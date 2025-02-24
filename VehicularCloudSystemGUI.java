@@ -109,16 +109,18 @@ class VehicularCloudFrame extends JFrame implements ActionListener {
         String data;
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         String timestamp = dtf.format(LocalDateTime.now());
-        
+
         if (ownerButton.isSelected()) {
+            if (!validateOwnerFields()) return; 
             data = "Owner," + ownerIdField.getText() + "," + vehicleInfoField.getText() + "," + residencyTimeField.getText() + "," + timestamp;
         } else if (clientButton.isSelected()) {
+            if (!validateClientFields()) return; 
             data = "Client," + clientIdField.getText() + "," + jobDurationField.getText() + "," + jobDeadlineField.getText() + "," + timestamp;
         } else {
             JOptionPane.showMessageDialog(this, "Please select a role.");
             return;
         }
-        
+
         try (FileWriter writer = new FileWriter("vehicular_cloud_data.txt", true)) {
             writer.write(data + "\n");
             JOptionPane.showMessageDialog(this, "Data saved successfully.");
@@ -126,4 +128,44 @@ class VehicularCloudFrame extends JFrame implements ActionListener {
             JOptionPane.showMessageDialog(this, "Error saving data.");
         }
     }
+    
+    private boolean validateOwnerFields() {
+        if (ownerIdField.getText().isEmpty() || vehicleInfoField.getText().isEmpty() || residencyTimeField.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "All fields must be filled!");
+            return false;
+        }
+        if (!residencyTimeField.getText().matches("\\d+")) {
+            JOptionPane.showMessageDialog(this, "Residency Time must be a positive number!");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validateClientFields() {
+        if (clientIdField.getText().isEmpty() || jobDurationField.getText().isEmpty() || jobDeadlineField.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "All fields must be filled!");
+            return false;
+        }
+        if (!jobDurationField.getText().matches("\\d+")) {
+            JOptionPane.showMessageDialog(this, "Job Duration must be a positive number!");
+            return false;
+        }
+        if (!isValidDate(jobDeadlineField.getText())) {
+            JOptionPane.showMessageDialog(this, "Invalid date format! Use yyyy/MM/dd HH:mm.");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isValidDate(String dateStr) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
+            LocalDateTime.parse(dateStr, formatter);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
 }
